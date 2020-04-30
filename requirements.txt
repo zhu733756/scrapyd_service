@@ -1,0 +1,9 @@
+Scrapy==1.6.0
+tldextract==2.2.1
+zope.interface==4.6.0
+w3lib==1.19.0
+python_scrapyd_api==2.1.2
+Twisted==18.9.0
+scrapyd==1.2.1
+six==1.12.0
+zope==4.4
