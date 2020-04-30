@@ -1,7 +1,7 @@
-/.idea
-/.vscode
-/.vagrant
-/.history
+.idea
+.vscode
+.vagrant
+.history
 *.pyc
 /dist
 /build
