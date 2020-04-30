@@ -3,6 +3,7 @@
 .vagrant
 .history
 *.pyc
+__pycache__
 /dist
 /build
 npm-debug.log
