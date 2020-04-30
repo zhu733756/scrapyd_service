@@ -128,7 +128,7 @@ pullcode.json = scrapyd_service.webservices_master.PullCode
 
 1.3 项目启动
 ```
-1 修改配置文件，参考1.2, master最多只能有一个
+1 修改配置文件，参考1.2, master最多只能有一个, 配置文件只添加一个
 2 cd scrapyd_service
 3 pip install -r requirements.txt
 4 python3 scrapyd_service/scripts/scrapyd_service_run.py
