@@ -126,7 +126,7 @@ daemonstatus.json = scrapyd_service.webservices_slave.DaemonStatus
 pullcode.json = scrapyd_service.webservices_master.PullCode
 ```
 
-1.3 项目启动
+#### 3 项目启动
 ```
 1 修改配置文件，参考1.2, master最多只能有一个, 配置文件只添加一个
 2 cd scrapyd_service
@@ -134,6 +134,7 @@ pullcode.json = scrapyd_service.webservices_master.PullCode
 4 python3 scrapyd_service/scripts/scrapyd_service_run.py
 ```
 
-1.4 关于远程调度api封装, 建议参考 /scrapyd_service/webservices_api.py
+#### 4 关于远程调度api封装
+建议参考 /scrapyd_service/webservices_api.py
 
 
