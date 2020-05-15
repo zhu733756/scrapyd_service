@@ -2,7 +2,7 @@ from scrapyd.webservice import DaemonStatus, WsResource
 import uuid
 from scrapyd.utils import native_stringify_dict, UtilsCache
 from copy import copy
-from .utils import get_spider_list, get_resource
+from .utils import get_spider_list
 import os
 import pathlib
 import time
@@ -89,14 +89,16 @@ class ListJobs(WsResource):
         project = args['project'][0]
         spiders = self.root.launcher.processes.values()
         running = [{"id": s.job, "spider": s.spider, "pid": s.pid,
-                    "start_time": s.start_time}
+                    "start_time": str(s.start_time), "cluster_node": self.root.node_name}
                    for s in spiders if s.project == project]
         queue = self.root.poller.queues[project]
-        pending = [{"id": x["_job"], "spider": x["name"]}
+        pending = [{"id": x["_job"], "spider": x["name"], "cluster_node": self.root.node_name}
                    for x in queue.list()]
         finished = [{"id": s.job, "spider": s.spider,
-                     "start_time": s.start_time,
-                     "end_time": s.end_time} for s in self.root.launcher.finished
+                     "start_time": str(s.start_time),
+                     "end_time": str(s.end_time),
+                     "cluster_node": self.root.node_name
+                     } for s in self.root.launcher.finished.load()
                     if s.project == project]
         return {"node_name": self.root.node_name, "status": "ok", "pending": pending, "running": running, "finished": finished}
 

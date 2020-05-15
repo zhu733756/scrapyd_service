@@ -39,9 +39,13 @@ def cancel():
     print(r)
 
 
+def deamon_status():
+    r = api.daemon_status()
+    print(r)
+
 if __name__ == "__main__":
     # pull_code()
     # schedule()
-    list_projects()
+    # list_projects()
     # list_spiders()
-    list_jobs()
+    deamon_status()

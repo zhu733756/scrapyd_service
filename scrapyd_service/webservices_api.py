@@ -4,13 +4,14 @@ from scrapyd_api.compat import iteritems, urljoin
 
 PULL_CODE_ENDPOINT = "/pullcode.json"
 PING_ENDPOINT = "/daemonstatus.json"
+CRAWL_LOG_ENDPOINT = "/crawllog.json"
 
 
 class DistributedScrapydApi(ScrapydAPI):
 
     def daemon_status(self):
         url = urljoin(self.target, PING_ENDPOINT)
-        json = self.client.post(url, timeout=self.timeout)
+        json = self.client.get(url, timeout=self.timeout)
         return json
 
     def add_version(self, project, version, egg):
@@ -19,6 +20,21 @@ class DistributedScrapydApi(ScrapydAPI):
         Scrapyd's add version endpoint.
         """
         raise Exception("接口不支持")
+
+    def crawl_log(self, cluser_node, project, spider,  job_id, show_total_log):
+        '''
+        get log on the cluster
+        '''
+        url = urljoin(self.target, CRAWL_LOG_ENDPOINT)
+        data = dict(
+            cluster_node=cluser_node,
+            project=project,
+            spider=spider,
+            jobid=job_id,
+            show_total_log=show_total_log
+        )
+        json = self.client.get(url, params=data, timeout=self.timeout)
+        return json
 
     def pull_code(self, project):
         """

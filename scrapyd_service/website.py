@@ -7,6 +7,7 @@ from .interfaces import IPoller, IEggStorage, ISpiderScheduler, IHostPinger
 from .utils import get_resources
 from six.moves.urllib.parse import urlparse
 import json
+import dateparser
 
 
 class Root(resource.Resource):
@@ -48,6 +49,10 @@ class Root(resource.Resource):
             }
         else:
             self.auth = None
+        # proxy scrapyd_service.proxy
+        if self.identity == "master":
+            self.proxy_runner = config.get("proxy_runner")
+            self.proxy_expire = config.get("proxy_expire")
         # home
         self.putChild(b'', Home(self, local_items))
         if logsdir:
@@ -241,19 +246,23 @@ class Jobs(resource.Resource):
         )
 
     def prep_tab_finished(self):
+        def _fromat(time):
+            return dateparser.parse(time)
+
         return '\n'.join(
             self.prep_row(dict(
                 Project=p.project, Spider=p.spider,
                 Job=p.job,
-                Start=microsec_trunc(p.start_time),
-                Runtime=microsec_trunc(p.end_time - p.start_time),
-                Finish=microsec_trunc(p.end_time),
+                Start=microsec_trunc(_fromat(p.start_time)),
+                Runtime=microsec_trunc(
+                    _fromat(p.start_time) - _fromat(p.end_time)),
+                Finish=microsec_trunc(_fromat(p.end_time)),
                 Log='<a href="/logs/%s/%s/%s.log">Log</a>' % (
                     p.project, p.spider, p.job),
                 Items='<a href="/items/%s/%s/%s.jl">Items</a>' % (
                     p.project, p.spider, p.job),
             ))
-            for p in self.root.launcher.finished
+            for p in self.root.launcher.finished.load()
         )
 
     def render(self, txrequest):

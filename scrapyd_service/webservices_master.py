@@ -1,18 +1,23 @@
-from scrapyd.webservice import WsResource
 import uuid
-from scrapyd.utils import native_stringify_dict, UtilsCache
-from copy import copy
-from .utils import get_spider_list
 import os
+import sys
 import pathlib
 import time
+import six
+from scrapyd.webservice import WsResource
+from scrapyd.utils import native_stringify_dict, UtilsCache
+from twisted.python import log
+from subprocess import Popen, PIPE
+from copy import copy
+from .utils import get_spider_list
+
 try:
     from cStringIO import StringIO as BytesIO
 except ImportError:
     from io import BytesIO
 from .webservices_api import DistributedScrapydApi
-import six
-from subprocess import Popen, PIPE
+from .protocol import ClusterLogProtocol, make_listenport, is_available
+from twisted.internet import reactor
 
 
 class DaemonStatus(WsResource):
@@ -159,42 +164,96 @@ class ListSpiders(WsResource):
 
 class ListJobs(WsResource):
 
-    def load_cluser_jobs(self, project, jobs_details):
+    def load_cluser_jobs(self, project):
+        running, pending, finished = [], [], []
         other_slave_hosts = copy(self.root.ping.available_slave_hosts)
         for slave in other_slave_hosts:
             client = DistributedScrapydApi(
                 target=f'http://{slave}', auth=self.root.auth)
             jobs = client.list_jobs(project)
-            jobs_details.append({
-                "node_name": jobs["node_name"],
-                "finished": jobs["finished"],
-                "running": jobs["running"],
-                "pending": jobs["pending"],
-            })
-        return jobs_details
+            running += jobs["running"]
+            finished += jobs["finished"]
+            pending += jobs["pending"]
+        return running, pending, finished
 
     def render_GET(self, txrequest):
         args = native_stringify_dict(copy(txrequest.args), keys_only=False)
         project = args['project'][0]
         spiders = self.root.launcher.processes.values()
         running = [{"id": s.job, "spider": s.spider, "pid": s.pid,
-                    "start_time": s.start_time}
+                    "start_time": str(s.start_time), "cluster_node": self.root.node_name}
                    for s in spiders if s.project == project]
         queue = self.root.poller.queues[project]
-        pending = [{"id": x["_job"], "spider": x["name"]}
+        pending = [{"id": x["_job"], "spider": x["name"], "cluster_node": self.root.node_name}
                    for x in queue.list()]
         finished = [{"id": s.job, "spider": s.spider,
-                     "start_time": s.start_time,
-                     "end_time": s.end_time} for s in self.root.launcher.finished.load()
+                     "start_time": str(s.start_time),
+                     "end_time": str(s.end_time),
+                     "cluster_node": self.root.node_name
+                     } for s in self.root.launcher.finished.load()
                     if s.project == project]
-        job_details = [{
-            "node_name": self.root.node_name,
-            "running": running,
-            "finished": finished,
-            "pending": pending
-        }]
-        job_details = self.load_cluser_jobs(project, job_details)
-        return {"cluster": self.root.cluster_name, "status": "ok",  "project": project, "job_details": job_details}
+
+        r, p, f = self.load_cluser_jobs(project)
+        running += r
+        pending += p
+        finished += f
+        return {"cluster": self.root.cluster_name, "status": "ok",  "running": running, "pending": pending, "finished": finished}
+
+
+class CrawlLog(WsResource):
+    '''日志使用临时代理端口请求出去'''
+
+    clients = {}
+
+    def _process_finished(self, _, target_host):
+        del self.clients[target_host]
+
+    def render_GET(self, txrequest):
+        args = native_stringify_dict(copy(txrequest.args), keys_only=False)
+        cluster_node = args['cluster_node'][0]
+        project = args['project'][0]
+        spider = args["spider"][0]
+        jobid = args["jobid"][0]
+
+        log_router = 'logs/{project}/{spider}/{job}.log'.format(
+            project=project, spider=spider, job=jobid)
+
+        if cluster_node == self.root.node_name:
+            log_url = f"http://{self.root.master_host}/{log_router}"
+            return {'message': 'ok', "status": "ok", "url": log_url}
+
+        target_host = None
+        register_hosts = self.root.ping.registered_slave_hosts
+        for host in register_hosts:
+            client = DistributedScrapydApi(
+                target=f'http://{host}', auth=self.root.auth)
+            daemon_status = client.daemon_status()
+            if daemon_status.get("node_name") == cluster_node:
+                target_host = host
+                break
+        if target_host in self.clients:
+            listen_port = self.clients[target_host]
+            if not is_available(listen_port):
+                # 说明被占用了,子进程还在
+                host = self.root.master_host.split(":")[0] + f":{listen_port}"
+                log_url = f"http://{host}/{log_router}"
+                return {'message': 'ok', "status": "ok", "url": log_url}
+        try:
+            listen_port = make_listenport()
+            ip, port = target_host.split(":")
+            runner = self.root.proxy_runner
+            expire = int(self.root.proxy_expire)
+            args = [sys.executable, "-m", runner,
+                    f"-i={ip}", f"-p={int(port)}", f"-l={listen_port}", f"-e={expire}"]
+            sp = ClusterLogProtocol(ip, int(port), listen_port)
+            sp.deferred.addBoth(self._process_finished, target_host)
+            reactor.spawnProcess(sp, sys.executable, args=args)
+            self.clients[target_host] = listen_port
+            host = self.root.master_host.split(":")[0] + f":{listen_port}"
+            log_url = f"http://{host}/{log_router}"
+            return {'message': 'ok', "status": "ok", "url": log_url}
+        except Exception as e:
+            return {'message': 'Load Log Error', "status": e.args, "url": ""}
 
 
 class DeleteProject(WsResource):

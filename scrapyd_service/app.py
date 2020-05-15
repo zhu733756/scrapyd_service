@@ -20,6 +20,7 @@ from .auth import PublicHTMLRealm, StringCredentialsChecker
 from .utils import get_resources
 from configparser import ConfigParser
 import json
+from twisted.web import proxy, server
 
 
 def keep_project_cfgfile(config):

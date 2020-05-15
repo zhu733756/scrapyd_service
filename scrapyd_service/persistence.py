@@ -16,7 +16,6 @@ def singleton(cls):
     return getinstance
 
 
-@singleton
 class FinishedSpidersDB(object):
     """
     finished spiders database
