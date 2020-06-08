@@ -48,4 +48,4 @@ if __name__ == "__main__":
     # schedule()
     # list_projects()
     # list_spiders()
-    deamon_status()
+    schedule()

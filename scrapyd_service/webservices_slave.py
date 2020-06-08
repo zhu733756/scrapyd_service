@@ -124,20 +124,23 @@ class PullCode(WsResource):
 
     def render_POST(self, txrequest):
         if not self.root.pull_code_by_git:
-            return {"node_name": self.root.node_name, "status": "error", "message": "canot pull code by git"}
+            return {"node_name": self.root.node_name, "status": "error", "message": "cannot pull code by git"}
         args = native_stringify_dict(copy(txrequest.args), keys_only=False)
-        project = args['project'][0]
-        cfg_filepath = self.root.cfg_resources.get(project)
-        project_path = str(pathlib.Path(cfg_filepath).parent)
+        project = args.get("project",[None])[0]
+        if not bool(project):
+            project_path = self.root.local_crawler_code_path
+        else:
+            cfg_filepath = self.root.cfg_resources.get(project) 
+            project_path = str(pathlib.Path(cfg_filepath).parent)
         os.chdir(project_path)
+        env = copy(os.environ())
         cmd = f"git checkout -- . && git pull origin {self.root.git_branch}"
         proc = Popen(cmd.split(" "), stdout=PIPE, stderr=PIPE, env=env)
         out, err = proc.communicate()
         if proc.returncode:
             msg = err or out or ''
             msg = msg.decode('utf8')
-            raise RuntimeError(msg.encode('unicode_escape')
-                               if six.PY2 else msg)
+            return {"cluster": self.root.cluster_name, "status": "error", "message": msg}
         # FIXME: can we reliably decode as UTF-8?
         # scrapy list does `print(list)`
         tmp = out.decode('utf-8').splitlines()

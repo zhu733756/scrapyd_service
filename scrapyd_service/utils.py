@@ -11,6 +11,7 @@ from configparser import ConfigParser
 from scrapy.settings import Settings
 from scrapy.utils.misc import load_object
 from scrapyd.utils import get_spider_list
+from shutil import ignore_patterns,copy2,copystat
 
 
 def get_spider_queues(config):
@@ -116,7 +117,6 @@ def get_crawl_args(message, env=os.environ):
         args += ['%s=%s' % (k, v)]
     return args
 
-
 def get_project_settings(st=None):
     env = os.environ.copy()
     project_path = env.get('SCRAPY_PROJECT_PATH')
@@ -126,3 +126,25 @@ def get_project_settings(st=None):
     settings_module_path = env.get('SCRAPY_SETTINGS_MODULE')
     settings.setmodule(settings_module_path, priority='project')
     return settings
+
+
+def _copytree(src, dst):
+    """复制一份项目结构"""
+
+    ignore = ignore_patterns('*.pyc', '.svn')
+    names = os.listdir(src)
+    ignored_names = ignore(src, names)
+
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+
+    for name in names:
+        if name in ignored_names:
+            continue
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        if os.path.isdir(srcname):
+            _copytree(srcname, dstname)
+        else:
+            copy2(srcname, dstname)
+    copystat(src, dst)

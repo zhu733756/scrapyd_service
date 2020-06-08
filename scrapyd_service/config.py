@@ -19,10 +19,7 @@ class Config(object):
     def __init__(self, values=None, extra_sources=()):
         if values is None:
             sources = self._getsources()
-            default_config = get_data(
-                __package__, 'conf/scrapyd_service.conf').decode('utf8')
             self.cp = SafeConfigParser()
-            self.cp.readfp(io.StringIO(default_config))
             sources.extend(extra_sources)
             for fname in sources:
                 try:
@@ -37,6 +34,7 @@ class Config(object):
     def _getsources(self):
         sources = ['/etc/scrapyd_service/scrapyd_service.conf',
                    r'c:\scrapyd_service\scrapyd_service.conf']
+        sources += [str(pathlib.Path(__file__).parent.joinpath('conf/scrapyd.conf'))]
         sources += sorted(glob.glob('/etc/scrapyd_service/conf.d/*'))
         sources += ['scrapyd_service/conf/scrapyd_service.conf']
         sources += [expanduser('~/.scrapyd_service.conf')]
