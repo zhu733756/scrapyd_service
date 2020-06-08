@@ -52,7 +52,7 @@ application = scrapyd_service.app.application
 launcher = scrapyd_service.launcher.Launcher
 webroot = scrapyd_service.website.Root
 
-[master - services]
+[master-services]
 schedule.json = scrapyd_service.webservices_master.Schedule
 cancel.json = scrapyd_service.webservices_master.Cancel
 listprojects.json = scrapyd_service.webservices_master.ListProjects
@@ -61,8 +61,9 @@ delproject.json = scrapyd_service.webservices_master.DeleteProject  # 慎用,这
 listjobs.json = scrapyd_service.webservices_master.ListJobs
 daemonstatus.json = scrapyd_service.webservices_master.DaemonStatus
 pullcode.json = scrapyd_service.webservices_master.PullCode
+crawllog.json = scrapyd_service.webservices_master.CrawlLog
 
-[slave - services]
+[slave-services]
 schedule.json = scrapyd_service.webservices_slave.Schedule
 cancel.json = scrapyd_service.webservices_slave.Cancel
 listprojects.json = scrapyd_service.webservices_slave.ListProjects
