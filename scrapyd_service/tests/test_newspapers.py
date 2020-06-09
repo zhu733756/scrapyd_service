@@ -46,6 +46,6 @@ def deamon_status():
 if __name__ == "__main__":
     # pull_code()
     # schedule()
-    # list_projects()
-    # list_spiders()
-    schedule()
+    list_projects()
+    list_spiders()
+    # schedule()

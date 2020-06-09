@@ -3,6 +3,7 @@
 from twisted.scripts.twistd import run
 from pathlib import Path
 from sys import argv, path
+import codecs
 try:
     import scrapyd_service
 except ImportError:

@@ -1,19 +1,14 @@
-# 基于镜像基础
 FROM python:3.7
 
-# 设置代码文件夹工作目录 /app
-WORKDIR /home/spider/app
+MAINTAINER zhu733756 1079333812@qq.com
 
-# 复制当前代码文件到容器中 /app
-COPY . /home/spider/app/source
-COPY ./docker/run.sh /app/run.sh
+WORKDIR /app
 
-# 安装所需的包
-RUN cd /home/spider/app/source \
-    && pip install  -r requirements.txt \
-    && chmod a+x /home/spider/app/run.sh
+COPY ./etc/pip.conf /root/.pip/pip.conf
+COPY ../scrpyd_service /app/source
+COPY ./scrpyd_service.conf /app/source/scrpyd_service/conf/scrapyd_service.conf
+COPY ./run.sh /app/run.sh
 
-VOLUME /home/spider/app/scrapyd_service
-CMD /bin/bash /home/spider/app/run.sh
+RUN cd /app/source && pip install -r requirements.txt && chmod a+x /app/run.sh
 
-# Run app.py when the container launches
+CMD /bin/bash /app/run.sh

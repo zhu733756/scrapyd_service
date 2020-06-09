@@ -1,0 +1,18 @@
+version: "3"
+services:
+  scrapyd_service_master:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - identity=master
+      - node=master
+      - slaves=[]
+      - codepath=/app/spider/DataCrawl
+      - branch=develop
+    ports:
+      - "6800:6800"
+    volumes:
+      - /home/spider/DataCrawl:/app/spider/DataCrawl
+      - ../../scrapyd_service:/app/source/scrapyd_service
+    restart: always

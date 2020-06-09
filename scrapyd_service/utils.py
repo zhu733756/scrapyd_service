@@ -10,8 +10,7 @@ from configparser import ConfigParser
 
 from scrapy.settings import Settings
 from scrapy.utils.misc import load_object
-from scrapyd.utils import get_spider_list
-from shutil import ignore_patterns,copy2,copystat
+from shutil import ignore_patterns, copy2, copystat
 
 
 def get_spider_queues(config):
@@ -116,6 +115,7 @@ def get_crawl_args(message, env=os.environ):
         args += ['--settings']
         args += ['%s=%s' % (k, v)]
     return args
+
 
 def get_project_settings(st=None):
     env = os.environ.copy()

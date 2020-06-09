@@ -20,17 +20,41 @@ from .auth import PublicHTMLRealm, StringCredentialsChecker
 from .utils import get_resources
 from configparser import ConfigParser
 import json
+import os
 from twisted.web import proxy, server
+
+
+def get_env(config):
+    identity = os.getenv("$identity")
+    if identity:
+        config.cp.set("cluster", "identity", identity)
+    node_name = os.getenv("$node")
+    if node_name:
+        config.cp.set("cluster", "node_name", node_name)
+    slave_hosts = os.getenv("$slaves")
+    if slave_hosts:
+        config.cp.set("cluster", "identity", identity)
+    code_path = os.getenv("$codepath")
+    if code_path:
+        config.cp.set("cluster", "local_crawler_code_path", code_path)
+    branch = os.getenv("$branch")
+    if branch:
+        config.cp.set("cluster", "branch", branch)
+    return config
 
 
 def keep_project_cfgfile(config):
     '''
     根据cfg文件确定爬虫项目,给config添加section
     '''
+    config = get_env(config)
     config.cp.add_section("cfg")
-    proj_paths = dict(config.items("projects", ())).values()
+    base_project_path = dict(config.items("cluster", ())).get(
+        "local_crawler_code_path")
+    projects = dict(config.items("projects", ())).values()
     cfg_resources = []
-    for proj_path in proj_paths:
+    for project in projects:
+        proj_path = str(pathlib.Path(base_project_path).joinpath(project))
         cfg_resources += get_resources(proj_path)
     if not config.cp.has_section("settings"):
         config.cp.add_section("settings")

@@ -32,8 +32,8 @@ class Config(object):
             self.cp.add_section(self.SECTION)
 
     def _getsources(self):
-        sources = ['/etc/scrapyd_service/scrapyd_service.conf',
-                   r'c:\scrapyd_service\scrapyd_service.conf']
+        sources = ['/etc/scrapyd_service/conf/scrapyd_service.conf',
+                   r'c:\scrapyd_service\conf\scrapyd_service.conf']
         sources += [str(pathlib.Path(__file__).parent.joinpath('conf/scrapyd.conf'))]
         sources += sorted(glob.glob('/etc/scrapyd_service/conf.d/*'))
         sources += ['scrapyd_service/conf/scrapyd_service.conf']
