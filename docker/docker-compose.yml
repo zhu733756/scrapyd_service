@@ -15,4 +15,6 @@ services:
     volumes:
       - /home/spider/DataCrawl:/app/spider/DataCrawl
       - ../../scrapyd_service:/app/source/scrapyd_service
+      - ../../dbs:/app/source/dbs
+      - ../../logs:/app/source/logs
     restart: always
