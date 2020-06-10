@@ -1,14 +1,17 @@
-FROM python:3.7
+FROM python:3.7.1
 
 MAINTAINER zhu733756 1079333812@qq.com
 
-WORKDIR /app
+RUN mkdir -p /app/source/scrapyd_service
+RUN mkdir -p /app/spider/DataCrawl
+WORKDIR /app/source
 
-COPY ./etc/pip.conf /root/.pip/pip.conf
-COPY ../scrpyd_service /app/source
-COPY ./scrpyd_service.conf /app/source/scrpyd_service/conf/scrapyd_service.conf
-COPY ./run.sh /app/run.sh
+COPY ./docker/etc/pip.conf /root/.pip/pip.conf
+COPY ./scrapyd_service /app/source/scrapyd_service
+COPY ./requirements.txt /app/source/scrapyd_service/requirements.txt
+COPY ./docker/etc/scrapyd_service.conf /app/source/scrapyd_service/conf/scrapyd_service.conf
+COPY ./docker/run.sh /app/run.sh
 
-RUN cd /app/source && pip install -r requirements.txt && chmod a+x /app/run.sh
+RUN cd /app/source/scrapyd_service && pip install -r requirements.txt && chmod a+x /app/run.sh
 
 CMD /bin/bash /app/run.sh
