@@ -15,8 +15,6 @@ COPY ./docker/etc/scrapyd_service.conf /app/source/scrapyd_service/conf/scrapyd_
 COPY ./docker/run.sh /app/run.sh
 
 RUN cd /app/source/scrapyd_service && pip install -r requirements.txt && chmod a+x /app/run.sh
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y git
+RUN apt-get install -y git
 
 CMD /bin/bash /app/run.sh
