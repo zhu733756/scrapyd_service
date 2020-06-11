@@ -25,21 +25,27 @@ from twisted.web import proxy, server
 
 
 def get_env(config):
-    identity = os.getenv("$identity")
+    identity = os.getenv("identity")
     if identity:
         config.cp.set("cluster", "identity", identity)
-    node_name = os.getenv("$node")
+    node_name = os.getenv("node")
     if node_name:
         config.cp.set("cluster", "node_name", node_name)
-    slave_hosts = os.getenv("$slaves")
+    slave_hosts = os.getenv("slaves")
     if slave_hosts:
         config.cp.set("cluster", "identity", identity)
-    code_path = os.getenv("$codepath")
+    code_path = os.getenv("codepath")
     if code_path:
         config.cp.set("cluster", "local_crawler_code_path", code_path)
-    branch = os.getenv("$branch")
+    branch = os.getenv("branch")
     if branch:
         config.cp.set("cluster", "branch", branch)
+
+    bind_address = os.getenv("bind_address","127.0.0.1")
+    http_port = os.getenv("http_port",6800)
+    if bind_address and http_port:
+        config.cp.set("scrapyd", "bind_address", bind_address)
+        config.cp.set("scrapyd", "http_port", int(http_port))
     return config
 
 

@@ -4,18 +4,64 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: scrapyd_service_master
+    container_name: master
     environment:
       - identity=master
       - node=master
-      - slaves=[]
+      - slaves=["127.0.0.1:6801"]
       - codepath=/app/spider/DataCrawl
       - branch=develop
+    network:
+      - scrapyd_service_net
     ports:
       - "6800:6800"
     volumes:
-      - /home/spider/DataCrawl:/app/spider/DataCrawl
+      - ./DataCrawl:/app/spider/DataCrawl
       - ./scrapyd_service:/app/source/scrapyd_service
-      - ./dbs:/app/source/dbs
-      - ./logs:/app/source/logs
+      - ./logs/master:/app/source/logs
     restart: always
+  scrapyd_service_slave_1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: slave001
+    environment:
+      - identity=slave
+      - node=slave001
+      - slaves=[]
+      - codepath=/app/spider/DataCrawl
+      - branch=develop
+    network:
+      - scrapyd_service_net
+    ports:
+      - "6801:6800"
+    volumes:
+      - ./DataCrawl:/app/spider/DataCrawl
+      - ./scrapyd_service:/app/source/scrapyd_service
+      - ./logs/slave001:/app/source/logs
+    restart: always
+  scrapyd_service_slave_2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: slave002
+    environment:
+      - identity=slave
+      - node=slave002
+      - slaves=[]
+      - codepath=/app/spider/DataCrawl
+      - branch=develop
+    network:
+      - scrapyd_service_net
+    ports:
+      - "6802:6800"
+    volumes:
+      - ./DataCrawl:/app/spider/DataCrawl
+      - ./scrapyd_service:/app/source/scrapyd_service   
+      - ./logs/slave002:/app/source/logs
+    restart: always
+
+  networks:
+    scrapyd_service_net:
+      driver: bridge
+  
