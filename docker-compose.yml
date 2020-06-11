@@ -1,4 +1,6 @@
-version: "3"
+version: "2.4"
+networks:
+    scrapyd_service_net:
 services:
   scrapyd_service_master:
     build:
@@ -11,7 +13,7 @@ services:
       - slaves=["127.0.0.1:6801"]
       - codepath=/app/spider/DataCrawl
       - branch=develop
-    network:
+    networks:
       - scrapyd_service_net
     ports:
       - "6800:6800"
@@ -31,7 +33,7 @@ services:
       - slaves=[]
       - codepath=/app/spider/DataCrawl
       - branch=develop
-    network:
+    networks:
       - scrapyd_service_net
     ports:
       - "6801:6800"
@@ -51,7 +53,7 @@ services:
       - slaves=[]
       - codepath=/app/spider/DataCrawl
       - branch=develop
-    network:
+    networks:
       - scrapyd_service_net
     ports:
       - "6802:6800"
@@ -60,8 +62,4 @@ services:
       - ./scrapyd_service:/app/source/scrapyd_service   
       - ./logs/slave002:/app/source/logs
     restart: always
-
-  networks:
-    scrapyd_service_net:
-      driver: bridge
   

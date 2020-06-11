@@ -45,7 +45,7 @@ def get_env(config):
     http_port = os.getenv("http_port",6800)
     if bind_address and http_port:
         config.cp.set("scrapyd", "bind_address", bind_address)
-        config.cp.set("scrapyd", "http_port", int(http_port))
+        config.cp.set("scrapyd", "http_port", http_port)
     return config
 
 
