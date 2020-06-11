@@ -10,7 +10,7 @@ services:
     environment:
       - identity=master
       - node=master
-      - slaves=["127.0.0.1:6801"]
+      - slaves=["127.0.0.1:6801","127.0.0.1:6802"]
       - codepath=/app/spider/DataCrawl
       - branch=develop
     networks:

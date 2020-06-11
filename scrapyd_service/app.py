@@ -42,7 +42,7 @@ def get_env(config):
         config.cp.set("cluster", "branch", branch)
 
     bind_address = os.getenv("bind_address","127.0.0.1")
-    http_port = os.getenv("http_port",6800)
+    http_port = os.getenv("http_port","6800")
     if bind_address and http_port:
         config.cp.set("scrapyd", "bind_address", bind_address)
         config.cp.set("scrapyd", "http_port", http_port)
