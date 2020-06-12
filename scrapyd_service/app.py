@@ -33,7 +33,7 @@ def get_env(config):
         config.cp.set("cluster", "node_name", node_name)
     slave_hosts = os.getenv("slaves")
     if slave_hosts:
-        config.cp.set("cluster", "identity", identity)
+        config.cp.set("cluster", "slave_hosts", slave_hosts)
     code_path = os.getenv("codepath")
     if code_path:
         config.cp.set("cluster", "local_crawler_code_path", code_path)

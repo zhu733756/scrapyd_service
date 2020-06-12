@@ -1,4 +1,4 @@
-from scrapyd.webservice import DaemonStatus, WsResource
+from scrapyd.webservice import  WsResource
 import uuid
 from scrapyd.utils import native_stringify_dict, UtilsCache
 from copy import copy
@@ -12,6 +12,16 @@ except ImportError:
     from io import BytesIO
 import six
 from subprocess import Popen, PIPE
+
+class DaemonStatus(WsResource):
+
+    def render_GET(self, txrequest):
+        pending = sum(q.count() for q in self.root.poller.queues.values())
+        running = len(self.root.launcher.processes)
+        finished = len(self.root.launcher.finished.load())
+
+        return {"node_name": self.root.node_name, "status": "ok", "pending": pending, "running": running, "finished": finished}
+
 
 
 class Schedule(WsResource):

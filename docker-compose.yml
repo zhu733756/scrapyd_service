@@ -1,6 +1,7 @@
-version: "2.4"
+version: "3"
 networks:
     scrapyd_service_net:
+      driver: bridge
 services:
   scrapyd_service_master:
     build:
@@ -10,9 +11,10 @@ services:
     environment:
       - identity=master
       - node=master
-      - slaves=["127.0.0.1:6801","127.0.0.1:6802"]
+      - slaves=["slave001:6800","slave002:6800"]
       - codepath=/app/spider/DataCrawl
       - branch=develop
+      - bind_address=0.0.0.0
     networks:
       - scrapyd_service_net
     ports:
@@ -33,10 +35,9 @@ services:
       - slaves=[]
       - codepath=/app/spider/DataCrawl
       - branch=develop
+      - bind_address=0.0.0.0
     networks:
       - scrapyd_service_net
-    ports:
-      - "6801:6800"
     volumes:
       - ./DataCrawl:/app/spider/DataCrawl
       - ./scrapyd_service:/app/source/scrapyd_service
@@ -53,10 +54,9 @@ services:
       - slaves=[]
       - codepath=/app/spider/DataCrawl
       - branch=develop
+      - bind_address=0.0.0.0
     networks:
       - scrapyd_service_net
-    ports:
-      - "6802:6800"
     volumes:
       - ./DataCrawl:/app/spider/DataCrawl
       - ./scrapyd_service:/app/source/scrapyd_service   
