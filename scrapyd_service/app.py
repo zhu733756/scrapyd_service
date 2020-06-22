@@ -41,8 +41,8 @@ def get_env(config):
     if branch:
         config.cp.set("cluster", "branch", branch)
 
-    bind_address = os.getenv("bind_address","127.0.0.1")
-    http_port = os.getenv("http_port","6800")
+    bind_address = os.getenv("bind_address", "127.0.0.1")
+    http_port = os.getenv("http_port", "6800")
     if bind_address and http_port:
         config.cp.set("scrapyd", "bind_address", bind_address)
         config.cp.set("scrapyd", "http_port", http_port)
@@ -54,7 +54,8 @@ def keep_project_cfgfile(config):
     根据cfg文件确定爬虫项目,给config添加section
     '''
     config = get_env(config)
-    config.cp.add_section("cfg")
+    if config.cp.has_section("cfg") and config.cp.has_section("settings"):
+        return config
     base_project_path = dict(config.items("cluster", ())).get(
         "local_crawler_code_path")
     projects = dict(config.items("projects", ())).values()
@@ -62,6 +63,8 @@ def keep_project_cfgfile(config):
     for project in projects:
         proj_path = str(pathlib.Path(base_project_path).joinpath(project))
         cfg_resources += get_resources(proj_path)
+    if not config.cp.has_section("cfg"):
+        config.cp.add_section("cfg")
     if not config.cp.has_section("settings"):
         config.cp.add_section("settings")
     reader = ConfigParser()

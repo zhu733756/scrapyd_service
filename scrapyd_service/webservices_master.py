@@ -9,7 +9,7 @@ from scrapyd.utils import native_stringify_dict, UtilsCache
 from twisted.python import log
 from subprocess import Popen, PIPE
 from copy import copy
-from .utils import get_spider_list,_copytree
+from .utils import get_spider_list, _copytree
 
 try:
     from cStringIO import StringIO as BytesIO
@@ -300,11 +300,11 @@ class PullCode(WsResource):
         if not self.root.pull_code_by_git:
             return {"cluster": self.root.cluster_name, "status": "error", "message": "cannot pull code by git"}
         args = native_stringify_dict(copy(txrequest.args), keys_only=False)
-        project = args.get("project",[None])[0]
+        project = args.get("project", [None])[0]
         if not bool(project):
             project_path = self.root.local_crawler_code_path
         else:
-            cfg_filepath = self.root.cfg_resources.get(project) 
+            cfg_filepath = self.root.cfg_resources.get(project)
             project_path = str(pathlib.Path(cfg_filepath).parent)
         os.chdir(project_path)
         cmd = f"git checkout -- . && git pull origin {self.root.git_branch}"
@@ -325,31 +325,13 @@ class PullCode(WsResource):
         return {"cluster": self.root.cluster_name, "status": "ok", "message_details": message_details}
 
 
-class PushCode(WsResource):
+class AddProject(WsResource):
 
     def render_POST(self, txrequest):
-        if not self.root.pull_code_by_git:
-            return {"cluster": self.root.cluster_name, "status": "error", "message": "cannot pull code by git"}
         args = native_stringify_dict(copy(txrequest.args), keys_only=False)
-        src_path = args["src_path"][0]
-        message = args["message"][0] or "add a new project"
-        if not os.path.exists(src_path):
-            return {"cluster": self.root.cluster_name, "status": "error", "message": "cannot get project path"}
-        local_crawler_code_path = self.root.local_crawler_code_path
-        # copy
-        project = os.path.split(src_path)[-1]
-        _copytree(src_path, os.path.join(local_crawler_code_path,project))
-        # git
-        os.chdir(local_crawler_code_path)
-        cmd = f'git checkout -- . && git pull origin {self.root.git_branch} && git add {project} && git commit -m "{message}" && git push origin {self.root.git_branch}'
-        proc = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
-        out, err = proc.communicate()
-        if proc.returncode:
-            msg = err or out or ''
-            msg = msg.decode('utf8')
-            return {"cluster": self.root.cluster_name, "status": "error", "message": msg}
-        # FIXME: can we reliably decode as UTF-8?
-        # scrapy list does `print(list)`
-        tmp = out.decode('utf-8').splitlines()
-        message_details = { "message": tmp}
-        return {"cluster": self.root.cluster_name, "status": "ok", "message_details": message_details}
+        project = args.get("project", [None])[0]
+        if project is None:
+            return {"cluster": self.root.cluster_name, "status": "error", "message": "cannot get a project name"}
+        self.root.scheduler.add_project(project)
+        self.root.update_projects()
+        return {"cluster": self.root.cluster_name, "status": "ok", "messages": "ok"}

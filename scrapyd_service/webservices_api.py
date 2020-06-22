@@ -3,7 +3,7 @@ from scrapyd_api import constants
 from scrapyd_api.compat import iteritems, urljoin
 
 PULL_CODE_ENDPOINT = "/pullcode.json"
-PUSH_CODE_ENDPOINT = "/pushcode.json"
+ADD_PROJECT_ENDPOINT = "/addproject.json"
 PING_ENDPOINT = "/daemonstatus.json"
 CRAWL_LOG_ENDPOINT = "/crawllog.json"
 
@@ -48,13 +48,13 @@ class DistributedScrapydApi(ScrapydAPI):
         json = self.client.post(url, data=data, timeout=self.timeout)
         return json
 
-    def push_code(self, message=''):
+    def add_project(self, project):
         """
-        pull code by git
+        push code by git
         """
-        url = urljoin(self.target, PUSH_CODE_ENDPOINT)
+        url = urljoin(self.target, ADD_PROJECT_ENDPOINT)
         data = {
-            'message': message,
+            'project': project
         }
         json = self.client.post(url, data=data, timeout=self.timeout)
         return json

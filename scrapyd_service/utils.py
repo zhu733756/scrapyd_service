@@ -74,9 +74,9 @@ def get_resources(path):
 
 
 def get_project_list(config):
-    settings = dict(config.items("settings"))
-    if settings:
-        return list(settings.keys())
+    projects = dict(config.items("projects"))
+    if projects:
+        return list(projects.keys())
 
 
 def get_spider_list(project, setting):

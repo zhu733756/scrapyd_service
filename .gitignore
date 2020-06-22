@@ -8,6 +8,8 @@ __pycache__
 /build
 npm-debug.log
 /test
+/dbs
+/logs
 /tests
 /logs/
 db.sqlite3

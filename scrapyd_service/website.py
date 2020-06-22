@@ -32,7 +32,7 @@ class Root(resource.Resource):
         self.cluster_name = cluster.get("cluster_name")
         self.node_name = cluster.get('node_name', socket.gethostname())
         self.identity = cluster.get("identity", "slave")
-        #git
+        # git
         self.all_code_is_same = cluster.get("is_all_code_same") == "True" or \
             cluster.get("is_all_code_same") == "False" or \
             json.loads(cluster.get("is_all_code_same", "true"))
@@ -40,7 +40,7 @@ class Root(resource.Resource):
             cluster.get("is_all_code_same") == "False" or \
             json.loads(cluster.get("pull_code_by_git", "true"))
         self.git_branch = cluster.get("branch", "master")
-        self.local_crawler_code_path= cluster.get("local_crawler_code_path")
+        self.local_crawler_code_path = cluster.get("local_crawler_code_path")
         # auth
         username = config.get("username")
         password = config.get("password")
