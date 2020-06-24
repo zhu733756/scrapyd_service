@@ -34,7 +34,7 @@ class Config(object):
     def _getsources(self):
         sources = ['/etc/scrapyd_service/conf/scrapyd_service.conf',
                    r'c:\scrapyd_service\conf\scrapyd_service.conf']
-        sources += [str(pathlib.Path(__file__).parent.joinpath('conf/scrapyd.conf'))]
+        sources += [str(pathlib.Path(__file__).parent.joinpath('conf/scrapyd_service.conf'))]
         sources += sorted(glob.glob('/etc/scrapyd_service/conf.d/*'))
         sources += ['scrapyd_service/conf/scrapyd_service.conf']
         sources += [expanduser('~/.scrapyd_service.conf')]
