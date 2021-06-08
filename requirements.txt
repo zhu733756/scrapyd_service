@@ -6,4 +6,4 @@ zope.interface==4.6.0
 Scrapy==1.6.0
 python_scrapyd_api==2.1.2
 dateparser==0.7.4
-zope==4.4.2
+zope==5.2.1
